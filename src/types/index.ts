@@ -1,0 +1,1 @@
+export { GameTypes } from './gameTypes';
