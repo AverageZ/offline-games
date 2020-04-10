@@ -60,7 +60,7 @@ export const game: GameConfiguration<GameState> = {
 
       for (let i = 0; i < 9; i++) {
         if (G.cells[i] === null) {
-          moves.push({ move: 'clickCell', args: [i] });
+          moves.push({ move: AvailableMoves.ClickCell, args: [i] });
         }
       }
 

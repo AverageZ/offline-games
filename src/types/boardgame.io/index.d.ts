@@ -206,12 +206,6 @@ declare module 'boardgame.io/react' {
     GameEvents,
   } from 'boardgame.io/core';
 
-  export class WrapperBoard {
-    moves: any;
-    events: any;
-    store: any;
-  }
-
   export type ProvidedGameProps<Moves, State = GameState> = {
     G: State;
     ctx: GameContext;
@@ -245,26 +239,79 @@ declare module 'boardgame.io/react' {
 declare module 'boardgame.io/client' {
   import { GameObj, GameMoves } from 'boardgame.io/core';
 
-  export class WrapperBoard {
-    moves: any;
-    events: any;
-    store: any;
-  }
-
   export interface ClientConfiguration {
     game: GameConfiguration<GameState>;
+
+    /**
+     * Number of players
+     */
     numPlayer?: number;
+
+    /**
+     * Your React component representing the game board.
+     */
     board?: React.ReactNode;
-    multiplayer?: {
-      server: string;
-    };
+
+    /**
+     * Set this to one of the following to enable multiplayer:
+     *
+     * SocketIO
+     *   Implementation that talks to a remote server using socket.io.
+     *
+     *   How to import:
+     *     import { SocketIO } from 'boardgame.io/multiplayer'
+     *
+     *   Arguments:
+     *     Object with 2 parameters
+     *        1. 'socketOpts' options to pass directly to socket.io client.
+     *        2. 'server' specifies the server location in the format: [http[s]:*]hostname[:port];
+     *            defaults to current page host.
+     *
+     * Local
+     *   Special local mode that uses an in-memory game master. Useful
+     *   for testing multiplayer interactions locally without having to
+     *   connect to a server.
+     *
+     *   How to import:
+     *     import { Local } from 'boardgame.io/multiplayer'
+     *
+     * Additionally, you can write your own transport implementation.
+     * See `src/client/client.js` for details.
+     */
+    multiplayer?: any;
+
+    /**
+     * Set to false to disable the Debug UI.
+     */
     debug?: boolean;
-    ai?: any;
+
+    /**
+     * An optional Redux store enhancer.
+     * This is useful for augmenting the Redux store
+     * for purposes of debugging or simply intercepting
+     * events in order to kick of
+     */
+    enhancer?: any;
   }
 
   export function Client(
     clientConfiguration: ClientConfiguration,
-  ): WrapperBoard;
+  ): React.ComponentType<{
+    /**
+     * Connect to a particular game (multiplayer).
+     */
+    gameID?: string;
+
+    /**
+     * Associate the client with a player (multiplayer).
+     */
+    playerID?: string;
+
+    /**
+     * Set to false to disable the Debug UI.
+     */
+    debug?: boolean;
+  }>;
 }
 
 declare module 'boardgame.io/server' {
