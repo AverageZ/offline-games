@@ -1,4 +1,10 @@
+# Bored Games!
+A repository of boardgames started during a time of quarantine. What would you add to the list?
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Typescript stuff
+- [boardgame.io](https://boardgame.io) types are slightly custom written as the provided ones aren't great
 
 ## Available Scripts
 
