@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Client, ProvidedGameProps } from 'boardgame.io/react';
-import { Local } from 'boardgame.io/multiplayer';
+// import { Local } from 'boardgame.io/multiplayer';
 
 import { game, GameState, AvailableMoves } from './conditions';
 
@@ -68,6 +68,24 @@ const TicTacToeBoard = (
       <table className="border-collapse border-2 border-gray-500">
         <tbody>{createCells(boardgame.cells, onClick)}</tbody>
       </table>
+
+      {props.ctx.gameover ? (
+        <div>
+          <h3 className="text-2xl">The result</h3>
+          <p className="mb-4">
+            {props.ctx.gameover?.winner
+              ? `Player ${props.ctx.gameover.winner} is the Winner`
+              : 'Draw!'}
+          </p>
+
+          <button
+            className="px-2 py-1 rounded border-blue border uppercase text-center transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-100"
+            onClick={() => props.reset()}
+          >
+            Play again
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -76,5 +94,5 @@ export const TicTacToe = Client({
   game,
   board: TicTacToeBoard,
   debug: true, // TODO with ENV var
-  multiplayer: Local(),
+  // multiplayer: Local(),
 });
