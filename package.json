@@ -22,11 +22,12 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "build:css": "postcss src/styles/tailwind.css -o src/index.css",
-    "watch:css": "postcss src/styles/tailwind.css -o src/index.css -w",
-    "start": "concurrently \"npm run watch:css\" \"react-scripts start\"",
+    "start": "react-scripts start",
     "build": "npm run build:css && react-scripts build",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "build:styles": "postcss src/styles/tailwind.css -o src/index.css",
+    "prebuild": "npm run build:styles",
+    "prestart": "npm run build:styles"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -50,7 +51,6 @@
     ]
   },
   "devDependencies": {
-    "concurrently": "^5.1.0",
     "prettier": "2.0.4",
     "tsdef": "^0.0.13"
   }
