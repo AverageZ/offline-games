@@ -5,10 +5,12 @@ import {
   ActivePlayers,
   StageMap,
   PhaseConfig,
+  LogEntry,
 } from 'boardgame.io';
 import { EventsAPI } from 'boardgame.io/dist/types/src/plugins/events/events';
 import { PlayerAPI } from 'boardgame.io/dist/types/src/plugins/plugin-player';
 import { RandomAPI } from 'boardgame.io/dist/types/src/plugins/plugin-random';
+import { Nullable } from 'tsdef';
 
 declare module 'boardgame.io/core' {
   import { AIConfiguration } from 'boardgame.io/ai';
@@ -136,7 +138,36 @@ declare module 'boardgame.io/core' {
   }
 
   export interface GameEvents {
-    endTurn: () => void;
+    /**
+     * This event ends the turn. The default behavior is to increment ctx.turn by 1 and advance currentPlayer to the next player according to the configured turn order (the default being a round-robin).
+     * This event also accepts an argument, which (if provided) switches the turn to the specified player instead.
+     */
+    endTurn: (nextPlayer?: { next: Player }) => void;
+
+    /**
+     * This event ends the current phase. If the definition for the current phase in the game object specifies a next option, then the game moves to that phase. If not, the game returns to a state where no phase is active.
+     */
+    endPhase: () => void;
+
+    /**
+     * This event ends the game. If you pass an argument to it, then that argument is made available in ctx.gameover. After the game is over, further state changes to the game (via a move or event) are not possible.
+     */
+    endGame: (arg?: unknown) => void;
+
+    /**
+     * Takes the player that called the event into the stage specified.
+     */
+    setStage: (stageName: string) => void;
+
+    /**
+     * Takes the game into the phase specified. Ends the active phase first.
+     */
+    setPhase: (phaseName: string) => void;
+
+    /**
+     * Allows adding additional players to the set of "active players", and also any stages that you want to put them in. See the guide on Stages for more details.
+     */
+    setActivePlayers: (...args: unknown[]) => void;
   }
 
   interface IAIMoveObj {
@@ -207,11 +238,83 @@ declare module 'boardgame.io/react' {
   } from 'boardgame.io/core';
 
   export type ProvidedGameProps<Moves, State = GameState> = {
+    /**
+     *  The game state.
+     */
     G: State;
+
+    /**
+     * The game metadata.
+     */
     ctx: GameContext;
+
+    /**
+     * if the client is able to currently make a move or interact with the game.
+     */
     isActive: boolean;
+
+    /**
+     * if connection to the server is active.
+     */
+    isConnected: boolean;
+
+    /**
+     * if it is a multiplayer game.
+     */
+    isMultiplayer: boolean;
+
+    /**
+     * An object containing functions to dispatch various game events like endTurn and endPhase.
+     */
     events: GameEvents<State>;
+
+    /**
+     * An object containing functions to dispatch various moves that you have defined.
+     * The functions are named after the moves you created using Game().
+     * Each function can take any number of arguments, and they are passed to the move
+     * function after G and ctx.
+     */
     moves: Record<Moves, (...args: unknown[]) => void>;
+
+    /**
+     * Function that resets the game.
+     */
+    reset: () => void;
+
+    /**
+     * Function that undoes the last move.
+     */
+    undo: () => void;
+
+    /**
+     * Function that redoes the previously undone move.
+     */
+    redo: () => void;
+
+    /**
+     * Function that will advance the game if AI is configured.
+     */
+    step?: () => void;
+
+    /**
+     * The game log.
+     */
+    log: LogEntry[];
+
+    /**
+     * The game ID associated with the client.
+     */
+    gameID: string | 'default';
+
+    /**
+     * The player ID associated with the client.
+     */
+    playerID: Nullable<string>;
+
+    /**
+     * An object containing the players that have joined the game from a room.
+     */
+    gameMetadata: { players: Record<Player, { id: Player; name: string }> };
   };
 
   export function Client(
@@ -251,6 +354,14 @@ declare module 'boardgame.io/client' {
      * Your React component representing the game board.
      */
     board?: React.ReactNode;
+
+    /*
+     * Optional: React component to display while the client
+     * is in the "loading" state prior to the initial sync
+     * with the game master. Relevant only in multiplayer mode.
+     * If this is not provided, the client displays "connecting...".
+     */
+    loading?: React.ReactNode;
 
     /**
      * Set this to one of the following to enable multiplayer:
